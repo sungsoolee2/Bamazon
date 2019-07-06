@@ -15,7 +15,7 @@ var connection = mysql.createConnection({
     password: "root",
     database: "bamazon"
 });
-
+var totalProducts =parseInt(10);
 // connect to the mysql server and sql database
 connection.connect(function (err) {
     if (err) throw err;
@@ -34,7 +34,7 @@ function displayInventory() {
             inventory += "Item ID: " + result[i].item_id + " | ";
             inventory += "Product Name: " + result[i].product_name + " | ";
             inventory += "Department: " + result[i].department_name + " | ";
-            inventory += "Price : " + result[i].price + " | ";
+            inventory += "Price : " + result[i].price + "\n";
 
             console.log(inventory);
         }
@@ -56,7 +56,7 @@ function start() {
 
                 // validate input is number from 1-10
                 validate: function (value) {
-                    if (!isNaN(value) && (value > 0 && value <= 10)) {
+                    if (!isNaN(value) && (value > 0 && value <= totalProducts)) {
                         return true;
                     } else {
                         console.log('   Please enter a number from 1-10');
