@@ -52,15 +52,32 @@ function start() {
                 name: "itemid",
                 type: "input",
                 message: "Please enter the ID of the Product to buy.",
-                filter: Number
-                
-                },
+                filter: Number,
+
+                // validate input is number from 1-10
+                validate: function (value) {
+                    if (!isNaN(value) && (value > 0 && value <= 10)) {
+                        return true;
+                    } else {
+                        console.log('   Please enter a number from 1-10');
+                        return false;
+                    }
+                }
+            },
             {
                 name: "quantity",
                 type: "input",
                 message: "Please enter Quantity of the product to buy.",
-                filter: Number
-                
+                filter: Number,
+
+                validate: function (value) {
+                    if (!isNaN(value)) {
+                        return true;
+                    } else {
+                        console.log(' Please enter a valid number!');
+                        return false;
+                    }
+                }
             }
 
         ]).then(function (answer) {
@@ -72,35 +89,34 @@ function start() {
             console.log(quantSelected);
 
             // Verifiy that id entered is in the database and is a valid id//
-            connection.query("SELECT * FROM products WHERE ?", [{item_id: itemSelected}], function (err, result)
-                 {
-                    if (err) throw err;
-                    console.log(JSON.stringify(result));
-                    if (result.length === 0) {
-                        console.log("Please enter a valid product ID number!");
-                        displayInventory();
+            connection.query("SELECT * FROM products WHERE ?", [{ item_id: itemSelected }], function (err, result) {
+                if (err) throw err;
+                console.log(JSON.stringify(result));
+                if (result.length === 0) {
+                    console.log("Please enter a valid product ID number!");
+                    displayInventory();
 
+                } else {
+
+                    var product = result[0];
+                    console.log(product);
+                    // check to see if quantity selected is in stock and then fill order if it is//
+                    if (quantSelected <= product.stock_quantity) {
+
+                        console.log("You purchased " + quantSelected + "  " + product.product_name)
+                        console.log("Your order has been filled. Your total purchase amount is $" + parseFloat(product.price * quantSelected).toFixed(2))
+
+                        connection.query("UPDATE products SET stock_quantity = " + (product.stock_quantity - quantSelected)
+                            + " WHERE item_id = " + itemSelected), function (err, result) {
+                                if (err) throw err;
+                            }
                     } else {
-
-                        var product = result[0];
-                        console.log(product);
-                        // check to see if quantity selected is in stock and then fill order if it is//
-                        if (quantSelected <= product.stock_quantity) {
+                        console.log("Insufficent stock available!");
                         
-                            console.log("You purchased "+ quantSelected+ "  "+ product.product_name)
-                            console.log("Your order has been filled. Your total purchase amount is $" + parseFloat(product.price * quantSelected).toFixed(2))
-                            
-                            connection.query("UPDATE products SET stock_quantity = " + (product.stock_quantity - quantSelected)
-                                + " WHERE item_id = " + itemSelected), function (err, result) {
-                                     if (err) throw err;
-                                }
-                        } else {
-                            console.log("Insufficent stock available!");
-                            displayInventory();
-                        }
-                        anotherPurchase();
                     }
-                })       
+                    anotherPurchase();
+                }
+            })
         })
 }
 
@@ -113,43 +129,25 @@ function anotherPurchase() {
                 type: "list",
                 message: "Would you like to purchase another item?",
                 choices: [
-                    "YES", 
+                    "YES",
                     "NO",
                 ]
             })
-        .then(function(answer) {
-                switch (answer.action) {
+        .then(function (answer) {
+            switch (answer.action) {
                 case "YES":
-                  displayInventory();
-                  break;
-          
+                    displayInventory();
+                    break;
+
                 case "NO":
-                  console.log("Thank you for shopping at Bamazon!")
-                  connection.end();
-                  break;
-                }
-            });
-        }
+                    console.log("Thank you for shopping at Bamazon!")
+                    connection.end();
+                    break;
+            }
+        });
+}
 //run to display items and prompt user for item and quantity
 displayInventory();
-
-// // validate input is number from 1-10
-// validate: function (value) {
-//     if (!isNaN(value) && (value > 0 && value <= 10)) {
-//         return true;
-//     } else {
-//         console.log('   Please enter a number from 1-10');
-//         return false;
-//     }
-// // validate input is number from 1-10
-// validate: function (value) {
-//     if (!isNaN(value)) {
-//         return true;
-//     } else {
-//         console.log('   Please enter a valid number!');
-//         return false;
-//     }
-// }
 
 
 
