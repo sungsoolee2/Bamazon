@@ -43,8 +43,10 @@ function displayInventory() {
             console.log(inventory);
         }
         //prompt user function call//
+        totalproducts = parseInt(result.length)
+        console.log(totalproducts);
         start();
-
+       
     });
 }
 
@@ -52,7 +54,7 @@ function displayInventory() {
 function displayLowInventory() {
 
     //display products that have less than 100 inventory//
-    connection.query("SELECT * FROM products WHERE stock_quantity < 100", function (err, result) {
+    connection.query("SELECT * FROM products WHERE stock_quantity < 5", function (err, result) {
         if (err) throw err;
         var inventory = "";
         for (var i = 0; i < result.length; i++) {
@@ -187,6 +189,21 @@ function addNewProduct() {
     inquirer
         .prompt([
             {
+                name: "item_id",
+                type: "input",
+                message: "Please enter Product ID?",
+                filter: Number,
+                validate: function(value){
+                    if (value<=totalproducts) {
+                        console.log("  That Id is already taken please enter another Id!")
+                        return false;
+                    }else{
+                        return true;
+                    }
+                }
+            },
+            
+            {
                 name: "product_name",
                 type: "input",
                 message: "Please enter Product Name?",
@@ -232,19 +249,30 @@ function addNewProduct() {
                
                 // add new item to database update total products//
                 totalproducts++;
-                var field=totalproducts;
-                connection.query("INSERT INTO products SET ?", answer, function (err, result, field) {
+                
+                connection.query("INSERT INTO products SET ?",{
+                    item_id: answer.item_id,
+                    product_name: answer.product_name,
+                    department_name: answer.department_name,
+                    price: answer.price,
+                    stock_quantity: answer.stock_quantity
+                  },
+            
+                function (err, result) {
                         if (err) throw err;
 
                         console.log("Product Id number is: "+ answer.item_id)
-                        console.log("You added" + answer.stock_quantity + "  " + answer.product_name)
-                        console.log("In Department" + answer.department_name + " at a price per unit of: "+answer.price)
-                        
+                        console.log("You added " + answer.stock_quantity + "  " + answer.product_name)
+                        console.log("In Department " + answer.department_name + " at a price per unit of: $"+answer.price)
+                        start();
+
                     })
             })  
 }
 
 displayInventory();
+
+
 
 
 
