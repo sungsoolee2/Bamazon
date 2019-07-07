@@ -15,13 +15,14 @@ var connection = mysql.createConnection({
     password: "root",
     database: "bamazon"
 });
+
+//gobal var to hold total number of products in database
 var totalProducts =parseInt(10);
+
 // connect to the mysql server and sql database
 connection.connect(function (err) {
     if (err) throw err;
-
 });
-
 
 function displayInventory() {
     //Display store items , id ,and price//
@@ -45,7 +46,7 @@ function displayInventory() {
 }
 
 function start() {
-    // prompt for info about the item being put up for auction
+    // prompt for info to buy//
     inquirer
         .prompt([
             {
@@ -83,15 +84,15 @@ function start() {
         ]).then(function (answer) {
             //assigning var to item, quant and total price//
             var itemSelected = (answer.itemid);
-            console.log(itemSelected);
+            // console.log(itemSelected);
 
             var quantSelected = parseInt(answer.quantity);
-            console.log(quantSelected);
+            // console.log(quantSelected);
 
             // Verifiy that id entered is in the database and is a valid id//
             connection.query("SELECT * FROM products WHERE ?", [{ item_id: itemSelected }], function (err, result) {
                 if (err) throw err;
-                console.log(JSON.stringify(result));
+                // console.log(JSON.stringify(result));
                 if (result.length === 0) {
                     console.log("Please enter a valid product ID number!");
                     displayInventory();
@@ -99,7 +100,7 @@ function start() {
                 } else {
 
                     var product = result[0];
-                    console.log(product);
+                    // console.log(product);
                     // check to see if quantity selected is in stock and then fill order if it is//
                     if (quantSelected <= product.stock_quantity) {
 
@@ -119,7 +120,6 @@ function start() {
             })
         })
 }
-
 
 function anotherPurchase() {
     inquirer

@@ -25,7 +25,6 @@ connection.connect(function (err) {
 
 });
 
-
 function displayInventory() {
     //Display store items , id ,and price and stock_quantity//
 
@@ -42,18 +41,18 @@ function displayInventory() {
 
             console.log(inventory);
         }
-        //prompt user function call//
+
+        //get total number of products in database from database and update totalproducts//
         totalproducts = parseInt(result.length)
-        console.log(totalproducts);
+        // console.log(totalproducts);
         start();
        
     });
 }
 
-
 function displayLowInventory() {
 
-    //display products that have less than 100 inventory//
+    //display products that have less than 5 inventory//
     connection.query("SELECT * FROM products WHERE stock_quantity < 5", function (err, result) {
         if (err) throw err;
         var inventory = "";
@@ -74,7 +73,7 @@ function displayLowInventory() {
 }
 
 function start() {
-    // prompt for info about the item being put up for auction
+    // prompt for main menu choices//
     inquirer
         .prompt([
             {
@@ -119,7 +118,7 @@ function addToInventory() {
                 message: "Please enter the ID of the Product to Add.",
                 filter: Number,
 
-                // validate input is number from 1-10
+                // validate input is number from 1-totalproducts
                 validate: function (value) {
                     if (!isNaN(value) && (value > 0 && value <= totalproducts)) {
                         return true;
@@ -148,15 +147,15 @@ function addToInventory() {
         ]).then(function (answer) {
             //assigning var to item, quant //
             var itemSelected = (answer.itemid);
-            console.log(itemSelected);
+            // console.log(itemSelected);
 
             var quantSelected = parseInt(answer.quantity);
-            console.log(quantSelected);
+            // console.log(quantSelected);
 
             // Verifiy that id entered is in the database and is a valid id//
             connection.query("SELECT * FROM products WHERE ?", [{ item_id: itemSelected }], function (err, result) {
                 if (err) throw err;
-                console.log(JSON.stringify(result));
+                // console.log(JSON.stringify(result));
                 if (result.length === 0) {
                     console.log("Please enter a valid product ID number!");
                     displayInventory();
@@ -164,7 +163,7 @@ function addToInventory() {
                 } else {
 
                     var product = result[0];
-                    console.log(product);
+                    // console.log(product);
                     // add item and quantity updates//
 
                     console.log("You added " + quantSelected + "  " + product.product_name)
@@ -182,8 +181,6 @@ function addToInventory() {
         
 }
 
-
-
 function addNewProduct() {
     // prompt for info to add new product to database Bamazon//
     inquirer
@@ -197,8 +194,12 @@ function addNewProduct() {
                     if (value<=totalproducts) {
                         console.log("  That Id is already taken please enter another Id!")
                         return false;
-                    }else{
+                    }else if (!isNaN(value) && (parseFloat(value) > 0)) {
                         return true;
+                      
+                    }else{
+                        console.log(" Please enter a valid number!")
+                        return false;
                     }
                 }
             },
@@ -219,7 +220,7 @@ function addNewProduct() {
                 type: "input",
                 message: "Please enter the price per item",
                 filter: Number,
-                // validate input decimal to 2 places
+                // validate as number//
                 validate: function (value) {
                     if (!isNaN(value) && (parseFloat(value) > 0)) {
                         return true;
